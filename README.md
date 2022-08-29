@@ -1,11 +1,19 @@
-## Self-hosted stuff
+# Self-hosted stuff
 
-## k8s
+## k8s locally
 1. kind
 1. k3s
 1. minikube
+1. microk8s
 1. docker-for-mac k8s
 
+I have implemented `k3s` using `multipass` to manage local VMs as nodes.
+
+## To Do
+- [ ] Implement sealed secrets for various deployment secrets
+- [ ] Look at storage classes in cluster and figure out how to persist backends or dump backups to the local host
+
+## Notes
 ## K3S
 
 1. Dynamic storage class
