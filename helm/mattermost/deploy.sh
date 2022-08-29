@@ -23,7 +23,7 @@ get_ip () {
 
 open_mattermost () {
   get_ip
-  echo $MATTERMOST_IP
+  # echo $MATTERMOST_IP
   open -a /Applications/Safari.app "http://$MATTERMOST_IP:8065"
 }
 
