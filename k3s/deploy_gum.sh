@@ -5,21 +5,32 @@
 TYPE=$(gum choose  --cursor.foreground="#05ffe6" --item.foreground="#8205ff" --selected.foreground="#8205ff" "install_k3s" "install_helm" "uninstall_all" "exit")
 
 if [[ "$TYPE" == "install_k3s" ]]; then
-  export MAIN_CPU$i=$(gum input --placeholder "MAIN_CPU$i (hint: integer number of cores)" --prompt "_.~^~._.~^~._.~^~._.~^~<8>--<")
-  export MAIN_MEM$i=$(gum input  --placeholder "MAIN_MEM$i (hint: 2G - integer with G for Gigabytes)" --prompt "_.~^~._.~^~._.~^~._.~^~<8>--<")
-  export MAIN_DISK$i=$(gum input --placeholder "MAIN_DISK$i (hint: 50G - local storage)" --prompt "_.~^~._.~^~._.~^~._.~^~<8>--<")
+  export MAIN_CPU$i=$(gum input --placeholder "MAIN_CPU$i (default: 1 - integer number of cores)" --prompt "_.~^~._.~^~._.~^~._.~^~<8>--<")
+  export MAIN_MEM$i=$(gum input  --placeholder "MAIN_MEM$i (default: 2G - integer with G for Gigabytes)" --prompt "_.~^~._.~^~._.~^~._.~^~<8>--<")
+  export MAIN_DISK$i=$(gum input --placeholder "MAIN_DISK$i (default: 10G - local storage)" --prompt "_.~^~._.~^~._.~^~._.~^~<8>--<")
 
   N_WORKERS=$(gum input --placeholder "N_WORKERS" --cursor.foreground "#FF0" --prompt.foreground "#0FF" --prompt "_.~^~._.~^~._.~^~._.~^~<8>--<")
+  CPUS=()
+  MEMS=()
+  DISKS=()
   for i in $(seq 1 $N_WORKERS); do
-    export CPU_WORKER_$i=$(gum input --placeholder "CPU_WORKER_$i (hint: integer number of cores)"  --cursor.foreground "#FF0" --prompt.foreground "#0FF" --prompt "_.~^~._.~^~._.~^~._.~^~<8>--<")
-    export MEM_WORKER_$i=$(gum input  --placeholder "MEM_WORKER_$i (hint: 2G - integer with G for Gigabytes)"  --cursor.foreground "#FF0" --prompt.foreground "#0FF" --prompt "_.~^~._.~^~._.~^~._.~^~<8>--<")
-    export DISK_WORKER_$i=$(gum input --placeholder "DISK_WORKER_$i (hint: 50G - local storage)"  --cursor.foreground "#FF0" --prompt.foreground "#0FF" --prompt "_.~^~._.~^~._.~^~._.~^~<8>--<")
-    WORKER_INFO+=("CPU_WORKER_$i")
-    WORKER_INFO+=("MEM_WORKER_$i")
-    WORKER_INFO+=("DISK_WORKER_$i")
+    CPUS[i]=$(gum input --placeholder "CPU_WORKER_$i (default: 1 - integer number of cores)"  --cursor.foreground "#FF0" --prompt.foreground "#0FF" --prompt "_.~^~._.~^~._.~^~._.~^~<8>--<")
+    MEMS[i]=$(gum input  --placeholder "MEM_WORKER_$i (default: 2G - integer with G for Gigabytes)"  --cursor.foreground "#FF0" --prompt.foreground "#0FF" --prompt "_.~^~._.~^~._.~^~._.~^~<8>--<")
+    DISKS[i]=$(gum input --placeholder "DISK_WORKER_$i (default: 10G - local storage)"  --cursor.foreground "#FF0" --prompt.foreground "#0FF" --prompt "_.~^~._.~^~._.~^~._.~^~<8>--<")
   done
-  # WORKERS=$(gum join --horizontal $WORKER_INFO)
   gum confirm "Ready to create control plane and $N_WORKERS workers?" --prompt.foreground "#0FF" && \
+    if [[ -z $MAIN_CPU ]]; then
+      MAIN_CPU="1"
+      echo "using control pane default $MAIN_CPU CPU"
+    fi
+    if [[ -z $MAIN_MEM ]]; then
+      MAIN_MEM="2G"
+      echo "using control pane default $MAIN_MEM MEM"
+    fi
+    if [[ -z $MAIN_DISK ]]; then
+      MAIN_DISK="10G"
+      echo "using control pane default $MAIN_DISK DISK"
+    fi
     multipass launch --name k3s-control-plane --cpus ${MAIN_CPU} --disk ${MAIN_DISK} --mem ${MAIN_MEM} focal && \
     echo 'updating ubuntu' && \
     multipass exec k3s-control-plane -- sh -c "sudo apt -y update && sudo apt -y upgrade" && \
@@ -29,10 +40,25 @@ if [[ "$TYPE" == "install_k3s" ]]; then
     # Get the kubernetes token and IP for the main node
     TOKEN=$(multipass exec k3s-control-plane sudo cat /var/lib/rancher/k3s/server/node-token) && \
     IP=$(multipass info k3s-control-plane | grep IPv4 | awk '{print $2}') && \
-    for f in $(seq 1 $n_workers); do
-        multipass launch --name k3s-worker-$f --cpus 2 --disk 100G --mem 4G focal
-        multipass exec k3s-worker-$f -- sh -c "sudo apt -y update && sudo apt -y upgrade"
-        multipass exec k3s-worker-$f -- bash -c "curl -sfL https://get.k3s.io | K3S_URL=\"https://$IP:6443\" K3S_TOKEN=\"$TOKEN\" sh -"
+    for f in $(seq 1 $N_WORKERS); do
+      echo ${CPUS[f]}
+      echo ${MEMS[f]}
+      echo ${DISKS[f]}
+      if [[ -z ${CPUS[f]} ]]; then
+        CPUS[f]="1"
+        echo "using worker default ${CPUS[f]}"
+      fi
+      if [[ -z ${MEMS[f]} ]]; then
+        MEMS[f]="2G"
+        echo "using worker default ${MEMS[f]}"
+      fi
+      if [[ -z ${DISKS[f]} ]]; then
+        DISKS[f]="10G"
+        echo "using worker default ${DISKS[f]}"
+      fi
+      multipass launch --name k3s-worker-$f --cpus ${CPUS[f]} --disk ${DISKS[f]} --mem ${MEMS[f]} focal
+      multipass exec k3s-worker-$f -- sh -c "sudo apt -y update && sudo apt -y upgrade"
+      multipass exec k3s-worker-$f -- bash -c "curl -sfL https://get.k3s.io | K3S_URL=\"https://$IP:6443\" K3S_TOKEN=\"$TOKEN\" sh -"
     done  && \
     # Change owner and permissions of kube config
     echo 'getting kube config' && \
