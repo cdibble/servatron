@@ -8,6 +8,9 @@ install () {
     --set mysql.mysqlUser=connor \
     --set mysql.mysqlPassword=samplePass123123 \
     --set service.type=LoadBalancer \
+    # --set persistence.data.enabled=true \
+    # --set persistence.data.size=50G \
+    # --set persistence.data.storageClass=local-path \
     -n mattermost \
     --create-namespace && \
   KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubectl get svc -n mattermost
