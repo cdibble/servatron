@@ -1,6 +1,7 @@
 # !/bin/bash
 # Mattermost Helm Chart Deployment
 install () {
+  multipass mount $LOCAL_DB_PATH k3s-control-plane:$POD_DB_PATH
   multipass exec k3s-control-plane -- sh -c "
   helm repo add mattermost https://helm.mattermost.com && \
   helm repo update && \
