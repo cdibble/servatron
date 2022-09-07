@@ -11,9 +11,13 @@ install () {
 }
 
 apply_l2_config () {
-  multipass copy-files ./metallb_l2_config.yaml k3s-control-plane:/mnt/metallb_l2_config.yaml
   multipass exec k3s-control-plane -- sh -c "
-  kubectl apply -f mnt/metallb_l2_config.yaml
+  sudo mkdir -p /mnt/metallb_l2_config.yaml
+  "
+  # multipass copy-files metallb_l2_config.yaml k3s-control-plane:/mnt/metallb_l2_config.yaml
+  multipass transfer ./metallb_l2_config.yaml k3s-control-plane:.
+  multipass exec k3s-control-plane -- sh -c "
+  kubectl apply -f ./metallb_l2_config.yaml
   "
 }
 
