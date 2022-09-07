@@ -25,7 +25,7 @@ if [[ "$TYPE" == "install_k3s_control_plane" ]]; then
     multipass exec k3s-control-plane -- sh -c "sudo apt -y update && sudo apt -y upgrade" && \
     # Install k3s
     echo 'installing k3s' && \
-    multipass exec k3s-control-plane -- sh -c "curl -sfL https://get.k3s.io | sh - --disable traefik --disable servicelb " #&& \
+    multipass exec k3s-control-plane -- sh -c "INSTALL_K3S_EXEC='server --disable-traefik --disable-servicelb' curl -sfL https://get.k3s.io | sh - " #&& \
   exit 0
 fi
 
