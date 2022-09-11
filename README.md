@@ -15,6 +15,13 @@ There are many. Here are a few I looked at.
 1. docker-for-mac k8s
 1. rancher desktop
 
+## Other self-hosting projects
+Some notable efforts I've seen to facilitate self-hosting on old computers or VMs or cloud.
+
+1. [YunoHost](https://yunohost.org/#/)
+1. [Tipi](https://github.com/meienberger/runtipi)
+1. [k3s home cluster blog post](https://www.fullstaq.com/knowledge-hub/blogs/setting-up-your-own-k3s-home-cluster)
+
 ## To Do
 - [ ] Implement sealed secrets for various deployment secrets
 - [ ] Look at storage classes in cluster and figure out how to persist backends or dump backups to the local host
