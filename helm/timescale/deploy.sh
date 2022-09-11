@@ -24,13 +24,24 @@ get_pg_pw () {
   echo $PGPOSTGRESPASSWORD
 }
 
+
+get_pg_host () {
+  # HOST_IP=$(multipass exec k3s-control-plane -- sh -c "
+  # kubectl get service/timescaledb -n timescaledb -o yaml | grep ingress -A 1 | awk '{print $4}'
+  # ")
+  HOST_IP=$(multipass exec k3s-control-plane -- sh -c "kubectl get service/timescaledb -n timescaledb -o yaml | grep 'ingress:' -A 1 | grep '\s[0-9\.]*' -o | xargs")
+  echo $HOST_IP
+}
+
 connect () {
-  # TIMESCALE_IP=$(multipass exec k3s-control-plane -- sh -c "
-  # kubectl get service/timescaledb -n timescaledb
-  # "
-  # )
-  # PGPASSWORD=$(get_pg_pw) psql -U postgres \
-  #     -h timescaledb.timescaledb.svc.cluster.local postgres
+  HOST_IP=$(get_pg_host)
+  PGPASS=$(get_pg_pw)
+  multipass exec k3s-control-plane -- sh -c "
+    PGPASSWORD=$PGPASS psql -U postgres -h $HOST_IP postgres
+  "
+}
+
+connect_pod_tunnel () {
   multipass exec k3s-control-plane -- sh -c "
     kubectl exec -ti timescaledb-0 -n timescaledb -- /usr/lib/postgresql/14/bin/psql
   "
