@@ -1,34 +1,37 @@
 # !/bin/bash
-# Mattermost Helm Chart Deployment
+# Traefik Helm Chart Deployment
 install () {
   multipass exec k3s-control-plane -- sh -c "
-  helm repo add timescale 'https://charts.timescale.com' && \
+  helm repo add traefik https://helm.traefik.io/traefik && \
   helm repo update && \
-  KUBECONFIG=/etc/rancher/k3s/k3s.yaml helm upgrade --install timescaledb timescale/timescaledb-single \
-    --set persistentVolumes.data.size=50Gi \
-    --set persistentVolumes.data.mountPath=/var/lib/postgresql \
-    -n timescaledb \
+  KUBECONFIG=/etc/rancher/k3s/k3s.yaml helm upgrade --install traefik traefik/traefik \
+    --set dashboard.enabled=true \
+    --set rbac.enabled=true \
+    -n kube-system \
     --create-namespace
   "
 }
 
-get_pg_pw () {
-  PGPOSTGRESPASSWORD=$(multipass exec k3s-control-plane -- sh -c "
-  kubectl get secret --namespace timescaledb timescaledb-credentials -o jsonpath="{.data.PATRONI_SUPERUSER_PASSWORD}" | base64 --decode
-  ")
-  echo $PGPOSTGRESPASSWORD
+traefik_pf () {
+  CONTROL_PLANE_IP=$(multipass info k3s-control-plane | grep IPv4 | grep -e '\s[0-9\.]*' -o | xargs)
+  sudo ssh \
+      -i /var/root/Library/Application\ Support/multipassd/ssh-keys/id_rsa \
+      -L 9000:localhost:8080 \
+      -o StrictHostKeyChecking=no \
+      ubuntu@$CONTROL_PLANE_IP
+  # curl $CONTROL_PLANE_IP:9000
 }
+# sudo ssh \
+#     -i /var/root/Library/Application\ Support/multipassd/ssh-keys/id_rsa \
+#     -L 8065:localhost:8065 \
+#     ubuntu@$multipass_vm_ip
 
-connect () {
-  # TIMESCALE_IP=$(multipass exec k3s-control-plane -- sh -c "
-  # kubectl get service/timescaledb -n timescaledb
-  # "
-  # )
-  multipass exec k3s-control-plane -- sh -c "
-    kubectl exec -ti timescaledb-0 -n timescaledb -- PGPASSWORD=$(get_pg_pw) psql -U postgres \
-      -h timescaledb.timescaledb.svc.cluster.local postgres
-  "
-}
+
+# traefik_pf () {
+#   multipass exec k3s-control-plane -- sh -c "
+#   kubectl port-forward deploy/traefik 9000 -n kube-system
+#   "
+# }
 
 
 if [[ -z $1 ]];
@@ -36,12 +39,12 @@ then
   install
 elif [ $1 == 'install' ]; then
     install
-elif [ $1 == 'get_pg_pw' ]; then
-  get_pg_pw
+elif [ $1 == 'traefik_pf' ]; then
+  traefik_pf
 elif [ $1 == 'connect' ]; then
   connect
 else
-  echo 'USAGE: ./deploy.sh [install|get_pg_pw|connect]'
+  echo 'USAGE: ./deploy.sh [install|traefik_pf|connect]'
 fi
 
 
