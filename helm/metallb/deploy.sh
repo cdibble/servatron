@@ -1,5 +1,5 @@
 # !/bin/bash
-# Mattermost Helm Chart Deployment
+# MetalLB Helm Chart Deployment
 install () {
   multipass exec k3s-control-plane -- sh -c "
   helm repo add metallb https://metallb.github.io/metallb && \
@@ -11,9 +11,9 @@ install () {
 }
 
 apply_l2_config () {
-  multipass exec k3s-control-plane -- sh -c "
-  sudo mkdir -p /mnt/metallb_l2_config.yaml
-  "
+  # multipass exec k3s-control-plane -- sh -c "
+  # sudo mkdir -p /mnt/metallb_l2_config.yaml
+  # "
   # multipass copy-files metallb_l2_config.yaml k3s-control-plane:/mnt/metallb_l2_config.yaml
   multipass transfer ./metallb_l2_config.yaml k3s-control-plane:.
   multipass exec k3s-control-plane -- sh -c "
