@@ -1,22 +1,31 @@
 # !/bin/bash
 # Mattermost Helm Chart Deployment
 install () {
-  multipass mount $LOCAL_DB_PATH k3s-control-plane:$POD_DB_PATH
-  multipass exec k3s-control-plane -- sh -c "
+  echo "installing"
+  # multipass mount $LOCAL_DB_PATH k3s-control-plane:$POD_DB_PATH
+  multipass exec k3s-control-plane -- sh -c '
   helm repo add mattermost https://helm.mattermost.com && \
   helm repo update && \
-  KUBECONFIG=/etc/rancher/k3s/k3s.yaml helm upgrade --install mattermost mattermost/mattermost-team-edition \
-    --set mysql.mysqlUser=connor \
-    --set mysql.mysqlPassword=samplePass123123 \
+  export KUBECONFIG=/etc/rancher/k3s/k3s.yaml && \
+  USERNAME=postgres && \
+  PGPASSWORD=$(kubectl get secret --namespace timescaledb timescaledb-credentials -o jsonpath="{.data.PATRONI_SUPERUSER_PASSWORD}" | base64 --decode) && \
+  DB_NAME=mattermost_prod && \
+  # HOST=$(kubectl get service/timescaledb -n timescaledb -o yaml | grep "ingress:" -A 1 | grep "\s[0-9\.]*" -o | xargs) && \
+  HOST=$(kubectl get service/timescaledb -n timescaledb -o yaml | grep "clusterIPs:" -A 1 | grep "\s[0-9\.]*" -o | xargs) && \
+  CONN_STR="$USERNAME:$PGPASSWORD@$HOST:5432/$DB_NAME?sslmode=require&connect_timeout=10" && \
+  # echo $CONN_STR && \
+  helm upgrade --install mattermost mattermost/mattermost-team-edition \
+    --set mysql.enabled=false \
+    --set externalDB.enabled=true \
+    --set externalDB.externalDriverType=postgres \
+    --set externalDB.externalConnectionString=$CONN_STR \
     --set service.type=LoadBalancer \
-    # --set persistence.data.enabled=true \
-    # --set persistence.data.size=50G \
-    # --set persistence.data.storageClass=local-path \
     -n mattermost \
     --create-namespace && \
   KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubectl get svc -n mattermost
-  "
+  '
 }
+
 
 get_ip () {
   MATTERMOST_IP=$(multipass exec k3s-control-plane -- sh -c "
@@ -24,6 +33,7 @@ get_ip () {
   )
   export MATTERMOST_IP
 }
+
 
 open_mattermost () {
   get_ip
