@@ -20,6 +20,11 @@ install () {
     --set externalDB.externalDriverType=postgres \
     --set externalDB.externalConnectionString=$CONN_STR \
     --set service.type=LoadBalancer \
+    --set ingress.enabled=true \
+    --set ingress.hosts="{mattermost.tuerto.net}" \
+    --set ingress.path="/" \
+    --set ingress.annotations."kubernetes\.io\/ingress\.class"=traefik \
+    --set ingress.annotations."cert-manager\.io\/cluster-issuer"=selfsigned-cluster-issuer \
     -n mattermost \
     --create-namespace && \
   KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubectl get svc -n mattermost
@@ -42,6 +47,17 @@ open_mattermost () {
 }
 
 
+apply_cert () {
+  # multipass exec k3s-control-plane -- sh -c "
+  # sudo mkdir -p /mnt/certificate.yaml
+  # "
+  # multipass copy-files certificate.yaml k3s-control-plane:/mnt/metallb_cert.yaml
+  multipass transfer ./certificate.yaml k3s-control-plane:.
+  multipass exec k3s-control-plane -- sh -c "
+  kubectl apply -f ./certificate.yaml
+  "
+}
+
 if [[ -z $1 ]];
 then
   install
@@ -51,8 +67,10 @@ elif [ $1 == 'get_ip' ]; then
   get_ip
 elif [ $1 == 'open_mattermost' ]; then
   open_mattermost
+elif [ $1 == 'apply_cert' ]; then
+  apply_cert
 else
-  echo 'USAGE: ./deploy.sh [install|get_ip|open_mattermost]'
+  echo 'USAGE: ./deploy.sh [install|get_ip|open_mattermost|apply_cert]'
 fi
 
 
