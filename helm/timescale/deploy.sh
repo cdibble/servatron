@@ -73,8 +73,10 @@ elif [ $1 == 'connect' ]; then
   connect
 elif [ $1 == 'install_psql' ]; then
   install_psql
+elif [ $1 == 'get_pg_host' ]; then
+  get_pg_host
 else
-  echo 'USAGE: ./deploy.sh [install|get_pg_pw|connect|install_psql]'
+  echo 'USAGE: ./deploy.sh [install|get_pg_pw|connect|install_psql|get_pg_host]'
 fi
 
 
