@@ -24,6 +24,7 @@ install () {
     --set ingress.hosts="{mattermost.tuerto.net}" \
     --set ingress.path="/" \
     --set ingress.annotations."kubernetes\.io\/ingress\.class"=traefik \
+    --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.entrypoints"=web \
     --set ingress.annotations."cert-manager\.io\/cluster-issuer"=selfsigned-cluster-issuer \
     -n mattermost \
     --create-namespace && \
