@@ -64,19 +64,19 @@ install_psql () {
 
 if [[ -z $1 ]];
 then
-  install
+  echo 'USAGE: ./deploy.sh [install|install_psql|connect|get_pg_pw|get_pg_host]'
 elif [ $1 == 'install' ]; then
-    install
-elif [ $1 == 'get_pg_pw' ]; then
-  get_pg_pw
-elif [ $1 == 'connect' ]; then
-  connect
+  install
 elif [ $1 == 'install_psql' ]; then
   install_psql
+elif [ $1 == 'connect' ]; then
+  connect
+elif [ $1 == 'get_pg_pw' ]; then
+  get_pg_pw
 elif [ $1 == 'get_pg_host' ]; then
   get_pg_host
 else
-  echo 'USAGE: ./deploy.sh [install|get_pg_pw|connect|install_psql|get_pg_host]'
+  echo 'USAGE: ./deploy.sh [install|install_psql|connect|get_pg_pw|get_pg_host]'
 fi
 
 

@@ -21,29 +21,15 @@ apply_l2_config () {
   "
 }
 
-connect () {
-  # TIMESCALE_IP=$(multipass exec k3s-control-plane -- sh -c "
-  # kubectl get service/timescaledb -n timescaledb
-  # "
-  # )
-  multipass exec k3s-control-plane -- sh -c "
-    kubectl exec -ti timescaledb-0 -n timescaledb -- PGPASSWORD=$(apply_l2_config) psql -U postgres \
-      -h timescaledb.timescaledb.svc.cluster.local postgres
-  "
-}
-
-
 if [[ -z $1 ]];
 then
-  install
+  echo 'USAGE: ./deploy.sh [install|apply_l2_config]'
 elif [ $1 == 'install' ]; then
     install
 elif [ $1 == 'apply_l2_config' ]; then
   apply_l2_config
-elif [ $1 == 'connect' ]; then
-  connect
 else
-  echo 'USAGE: ./deploy.sh [install|apply_l2_config|connect]'
+  echo 'USAGE: ./deploy.sh [install|apply_l2_config]'
 fi
 
 
