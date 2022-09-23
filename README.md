@@ -24,11 +24,12 @@ Some notable efforts I've seen to facilitate self-hosting on old computers or VM
 
 ## To Do
 - [ ] Implement sealed secrets for various deployment secrets
-- [ ] Look at storage classes in cluster and figure out how to persist backends or dump backups to the local host
-- [ ] Implement a Postgres DB for the mattermost backend that works on any architecture.
-    - [ ] Deploy `timescaledb` as helm chart
-    - [ ] Connect `mattermost` to this `timescaledb` deployment to use as a backend DB.
-        - [ ] Need a func for extracting connection info
+- [X] Look at storage classes in cluster and figure out how to persist backends or dump backups to the local host
+- [X] Implement a Postgres DB for the mattermost backend that works on any architecture.
+    - [X] Deploy `timescaledb` as helm chart
+    - [X] Connect `mattermost` to this `timescaledb` deployment to use as a backend DB.
+        - [X] Need a func for extracting connection info
+- [ ] Expose External IP
 
 # K3S
 `k3s` is deployed onto `multipass` VMs by the `./k3s/deploy*` scripts. Those scripts will handle creating a control-plane and N worker nodes. You can also install helm that way.
