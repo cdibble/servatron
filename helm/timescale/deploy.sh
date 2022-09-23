@@ -1,9 +1,9 @@
 # !/bin/bash
 # TimescaleDB Helm Chart Deployment
 install () {
-  LOCAL_DB_PATH=/opt/var/lib/postgresql
+  LOCAL_DB_PATH=/opt/var/lib/postgresql/k3s
   sudo mkdir -p $LOCAL_DB_PATH
-  POD_DB_PATH=/mnt/var/lib/postgresql
+  POD_DB_PATH=/var/lib/rancher/k3s/storage
   echo 'mounting'
   multipass mount $LOCAL_DB_PATH k3s-control-plane:$POD_DB_PATH
   multipass exec k3s-control-plane -- sh -c "
@@ -11,6 +11,7 @@ install () {
   helm repo update && \
   KUBECONFIG=/etc/rancher/k3s/k3s.yaml helm upgrade --install timescaledb timescale/timescaledb-single \
     --set persistentVolumes.data.size=50Gi \
+    --set persistentVolumes.data.storageClass=local-path \
     --set persistentVolumes.data.mountPath=$POD_DB_PATH \
     -n timescaledb \
     --create-namespace
@@ -47,19 +48,59 @@ connect_pod_tunnel () {
   "
 }
 
+
 install_psql () {
-  # sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-  # command='sudo sh -c '\''echo $("deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main") > /etc/apt/sources.list.d/pgdg.list'\'''
-  # multipass exec k3s-control-plane -- sh -c "sudo mkdir -p /etc/apt/sources.list.d/pgdg.list"
-  command='sudo sh -c ''echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main"  > /etc/apt/sources.list.d/pgdg.list'''
-  echo "$command"
-  multipass exec k3s-control-plane -- sh -c "($command)"
-  multipass exec k3s-control-plane -- sh -c "
-  wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-  "
-  multipass exec k3s-control-plane -- sh -c "sudo apt-get update"
-  multipass exec k3s-control-plane -- sh -c "sudo apt-get install -y postgresql-14"
+  if [[ -z $1 ]];then
+    psql_version=14
+    echo 'installing psql-14 (default)'
+  else
+    psql_version=$1
+    echo "installing psql-$1"
+  fi
+  echo $psql_version
+multipass exec k3s-control-plane -- sh -c "echo $psql_version > psql_version.txt"
+multipass exec k3s-control-plane -- sh -c '
+cat << EOF > psql_install.txt
+sudo sh -c ''echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list''
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+sudo apt-get update
+sudo apt-get install -y postgresql-$(cat psql_version.txt)
+EOF
+'
+  multipass exec k3s-control-plane -- sh -c "cat psql_install.txt | sh"
 }
+
+# cat << EOF > command.txt
+# sudo sh -c \'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list\'
+# EOF
+
+# multipass exec k3s-control-plane -- sh -c "cat << EOF > command.txt
+# sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+# EOF
+# "
+# # sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+#   # command=sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+#   # multipass exec k3s-control-plane -- sh -c "sudo mkdir -p /etc/apt/sources.list.d/pgdg.list"
+#   echo 'ok'
+#   DISTRO=$(multipass exec k3s-control-plane -- sh -c "lsb_release -cs")
+#   COMM="deb http://apt.postgresql.org/pub/repos/apt $DISTRO-pgdg main"
+#   command="sudo sh -c \"echo $COMM\" > /etc/apt/sources.list.d/pgdg.list"
+#   multipass exec k3s-control-plane -- sh -c "cat << EOF > command.txt
+#     $command
+#     "
+#   multipass exec k3s-control-plane -- sh -c "$(cat command.txt)"
+#   command='
+#   sudo sh -c ''echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main"  >> /etc/apt/sources.list.d/pgdg.list''
+#   '
+#   # command='echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
+#   echo "$command"
+#   # multipass exec k3s-control-plane -- sh -c $command
+#   multipass exec k3s-control-plane -- sh -c "
+#   wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+#   "
+#   multipass exec k3s-control-plane -- sh -c "sudo apt-get update"
+#   multipass exec k3s-control-plane -- sh -c "sudo apt-get install -y postgresql-14"
+# }
 
 
 if [[ -z $1 ]];
