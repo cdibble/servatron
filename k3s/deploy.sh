@@ -1,6 +1,6 @@
 #!/bin/bash
 
-install () {
+multipass_install () {
     # Run Multipass VM
     # multipass find
     echo "launching vm for k3s control plane plus $n_workers workers"
@@ -27,7 +27,34 @@ install () {
     multipass copy-files k3s-control-plane:/etc/rancher/k3s/k3s.yaml .
 }
 
-shell () {
+install () {
+    # Install locally
+    # echo "launching vm for k3s control plane plus $n_workers workers"
+    # multipass launch --name k3s-control-plane --cpus 2 --disk 50G --mem 4G focal
+    # Update Ubuntu
+    echo 'updating OS'
+    sudo apt -y update && sudo apt -y upgrade
+    # Install k3s
+    echo 'installing k3s'
+    curl -sfL https://get.k3s.io | sh -
+    # Get the kubernetes token and IP for the main node
+    TOKEN=$(sudo cat /var/lib/rancher/k3s/server/node-token)
+    # IP=$(multipass info k3s-control-plane | grep IPv4 | awk '{print $2}')
+    # launch worker nodes
+    # for f in $(seq 1 $n_workers); do
+    #     multipass launch --name k3s-worker-$f --cpus 2 --disk 100G --mem 4G focal
+    #     multipass exec k3s-worker-$f -- sh -c "sudo apt -y update && sudo apt -y upgrade"
+    #     multipass exec k3s-worker-$f -- bash -c "curl -sfL https://get.k3s.io | K3S_URL=\"https://$IP:6443\" K3S_TOKEN=\"$TOKEN\" sh -"
+    # done
+    # Change owner and permissions of kube config
+    # echo 'getting kube config'
+    # sudo chown ubuntu:ubuntu /etc/rancher/k3s/k3s.yaml
+    # sudo chmod 744 /etc/rancher/k3s/k3s.yaml
+    # Copy Kube Config to local
+    # multipass copy-files k3s-control-plane:/etc/rancher/k3s/k3s.yaml .
+}
+
+multipass_shell () {
     # shell on that vm
     multipass shell k3s-control-plane
 }
@@ -58,11 +85,14 @@ elif [ $1 == 'install' ]; then
     else
         export n_workers=$2
     fi
-    install
+    if [[ -z "${MULTIPASS}" ]] | [[ "${MULTIPASS}" == "False"]]; then
+      multipass_install
+    elif [[ "${MULTIPASS}" == "True"]]; then
+      install
 elif [ $1 == 'shell' ]; then
   shell
 elif [ $1 == 'install_helm' ]; then
   install_helm
 else
-  echo 'USAGE: ./deploy.sh [install|shell|install_helm]'
+  echo 'USAGE: ./deploy.sh [install|shell|install_helm] \nTo use multipass VMs, use export MULTIPASS=True'
 fi
