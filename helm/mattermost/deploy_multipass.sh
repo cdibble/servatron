@@ -3,6 +3,7 @@
 install () {
   echo "installing"
   # multipass mount $LOCAL_DB_PATH k3s-control-plane:$POD_DB_PATH
+  multipass exec k3s-control-plane -- sh -c '
   helm repo add mattermost https://helm.mattermost.com && \
   helm repo update && \
   export KUBECONFIG=/etc/rancher/k3s/k3s.yaml && \
@@ -28,12 +29,22 @@ install () {
     -n mattermost \
     --create-namespace && \
   KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubectl get svc -n mattermost
+  '
 }
 
 
 get_ip () {
-  MATTERMOST_IP=$(kubectl get services --namespace mattermost mattermost-team-edition --output jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  MATTERMOST_IP=$(multipass exec k3s-control-plane -- sh -c "
+  kubectl get services --namespace mattermost mattermost-team-edition --output jsonpath='{.status.loadBalancer.ingress[0].ip}'" \
+  )
   export MATTERMOST_IP
+}
+
+
+open_mattermost () {
+  get_ip
+  # echo $MATTERMOST_IP
+  open -a /Applications/Safari.app "http://$MATTERMOST_IP:8065"
 }
 
 
@@ -42,7 +53,10 @@ apply_cert () {
   # sudo mkdir -p /mnt/certificate.yaml
   # "
   # multipass copy-files certificate.yaml k3s-control-plane:/mnt/metallb_cert.yaml
+  multipass transfer ./certificate.yaml k3s-control-plane:.
+  multipass exec k3s-control-plane -- sh -c "
   kubectl apply -f ./certificate.yaml
+  "
 }
 
 if [[ -z $1 ]];
@@ -52,10 +66,12 @@ elif [ $1 == 'install' ]; then
     install
 elif [ $1 == 'get_ip' ]; then
   get_ip
+elif [ $1 == 'open_mattermost' ]; then
+  open_mattermost
 elif [ $1 == 'apply_cert' ]; then
   apply_cert
 else
-  echo 'USAGE: ./deploy.sh [install|get_ip|apply_cert]'
+  echo 'USAGE: ./deploy.sh [install|get_ip|open_mattermost|apply_cert]'
 fi
 
 

@@ -56,7 +56,7 @@ install () {
 
 multipass_shell () {
     # shell on that vm
-    multipass shell k3s-control-plane
+    multipass shell k3setr-control-plane
 }
 
 install_helm () {
@@ -74,25 +74,24 @@ install_helm () {
 #     -L 8065:localhost:8065 \
 #     ubuntu@$multipass_vm_ip
 
-
+USAGE='USAGE: ./deploy.sh [install|shell|install_helm] \nTo use multipass VMs, use export MULTIPASS=True'
 if [[ -z $1 ]];
 then
-  install
-elif [ $1 == 'install' ]; then
+  echo $USAGE
+elif [ $1 == 'multipass_install' ]; then
     if [[ -z $2 ]];
     then
         export n_workers=1
     else
         export n_workers=$2
     fi
-    if [[ -z "${MULTIPASS}" ]] | [[ "${MULTIPASS}" == "False"]]; then
-      multipass_install
-    elif [[ "${MULTIPASS}" == "True"]]; then
-      install
+  multipass_install
+elif [ $1 == 'install' ]; then
+  install
 elif [ $1 == 'shell' ]; then
   shell
 elif [ $1 == 'install_helm' ]; then
   install_helm
 else
-  echo 'USAGE: ./deploy.sh [install|shell|install_helm] \nTo use multipass VMs, use export MULTIPASS=True'
+  echo $USAGE
 fi
