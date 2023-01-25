@@ -1,229 +1,213 @@
 apiVersion: "acid.zalan.do/v1"
-kind: postgresql
+kind: OperatorConfiguration
 metadata:
-  name: tuerto-postgres
-#  labels:
-#    application: test-app
-#    environment: demo
-#  annotations:
-#    "acid.zalan.do/controller": "second-operator"
-#    "delete-date": "2020-08-31"  # can only be deleted on that day if "delete-date "key is configured
-#    "delete-clustername": "acid-test-cluster"  # can only be deleted when name matches if "delete-clustername" key is configured
-spec:
-  dockerImage: ghcr.io/zalando/spilo-15:2.1-p9
-  teamId: "tuerto"
-  numberOfInstances: 1
-  users:  # Application/Robot users
-    conman:
-    - superuser
-    - createdb
-    foo_user: []
-#    flyway: []
-#  usersWithSecretRotation:
-#  - foo_user
-#  usersWithInPlaceSecretRotation:
-#  - flyway
-#  - bar_owner_user
-  enableMasterLoadBalancer: false
-  enableReplicaLoadBalancer: false
-  enableConnectionPooler: false # enable/disable connection pooler deployment
-  enableReplicaConnectionPooler: false # set to enable connectionPooler for replica service
-  allowedSourceRanges:  # load balancers' source ranges for both master and replica services
-  - 127.0.0.1/32
-  databases:
-    foo: conman
-  preparedDatabases:
-    bar:
-      defaultUsers: true
-      extensions:
-        pg_partman: public
-        pgcrypto: public
-      schemas:
-        data: {}
-        history:
-          defaultRoles: true
-          defaultUsers: false
-  postgresql:
-    version: "15"
-    parameters:  # Expert section
-      shared_buffers: "32MB"
-      max_connections: "10"
-      log_statement: "all"
-#  env:
-#  - name: wal_s3_bucket
-#    value: my-custom-bucket
-
-  volume:
-    size: 2Gi
-#    storageClass: my-sc
-#    iops: 1000  # for EBS gp3
-#    throughput: 250  # in MB/s for EBS gp3
-#    selector:
-#      matchExpressions:
-#        - { key: flavour, operator: In, values: [ "banana", "chocolate" ] }
-#      matchLabels:
-#        environment: dev
-#        service: postgres
-  additionalVolumes:
-    - name: empty
-      mountPath: /opt/empty
-      targetContainers:
-        - all
-      volumeSource:
-        emptyDir: {}
-#    - name: data
-#      mountPath: /home/postgres/pgdata/partitions
-#      targetContainers:
-#        - postgres
-#      volumeSource:
-#        PersistentVolumeClaim:
-#          claimName: pvc-postgresql-data-partitions
-#          readyOnly: false
-#    - name: conf
-#      mountPath: /etc/telegraf
-#      subPath: telegraf.conf
-#      targetContainers:
-#        - telegraf-sidecar
-#      volumeSource:
-#        configMap:
-#          name: my-config-map
-
-  enableShmVolume: true
-#  spiloRunAsUser: 101
-#  spiloRunAsGroup: 103
-#  spiloFSGroup: 103
-#  podAnnotations:
-#    annotation.key: value
-#  serviceAnnotations:
-#    annotation.key: value
-#  podPriorityClassName: "spilo-pod-priority"
-#  tolerations:
-#  - key: postgres
-#    operator: Exists
-#    effect: NoSchedule
-  resources:
-    requests:
-      cpu: 10m
-      memory: 100Mi
-    limits:
-      cpu: 1000m
-      memory: 500Mi
-  patroni:
-    failsafe_mode: false
-    initdb:
-      encoding: "UTF8"
-      locale: "en_US.UTF-8"
-      data-checksums: "true"
-#    pg_hba:
-#      - hostssl all all 0.0.0.0/0 md5
-#      - host    all all 0.0.0.0/0 md5
-#    slots:
-#      permanent_physical_1:
-#        type: physical
-#      permanent_logical_1:
-#        type: logical
-#        database: foo
-#        plugin: pgoutput
-    ttl: 30
-    loop_wait: 10
-    retry_timeout: 10
-    synchronous_mode: false
-    synchronous_mode_strict: false
-    synchronous_node_count: 1
-    maximum_lag_on_failover: 33554432
-
-# restore a Postgres DB with point-in-time-recovery
-# with a non-empty timestamp, clone from an S3 bucket using the latest backup before the timestamp
-# with an empty/absent timestamp, clone from an existing alive cluster using pg_basebackup
-#  clone:
-#    uid: "efd12e58-5786-11e8-b5a7-06148230260c"
-#    cluster: "acid-minimal-cluster"
-#    timestamp: "2017-12-19T12:40:33+01:00"  # timezone required (offset relative to UTC, see RFC 3339 section 5.6)
-#    s3_wal_path: "s3://custom/path/to/bucket"
-
-# run periodic backups with k8s cron jobs
-#  enableLogicalBackup: true
-#  logicalBackupSchedule: "30 00 * * *"
-
-#  maintenanceWindows:
-#  - 01:00-06:00  #UTC
-#  - Sat:00:00-04:00
-
-# overwrite custom properties for connection pooler deployments
-#  connectionPooler:
-#    numberOfInstances: 2
-#    mode: "transaction"
-#    schema: "pooler"
-#    user: "pooler"
-#    resources:
-#      requests:
-#        cpu: 300m
-#        memory: 100Mi
-#      limits:
-#        cpu: "1"
-#        memory: 100Mi
-
-  initContainers:
-  - name: date
-    image: busybox
-    command: [ "/bin/date" ]
-#  sidecars:
-#   - name: "telegraf-sidecar"
-#     image: "telegraf:latest"
-#     ports:
-#     - name: metrics
-#       containerPort: 8094
-#       protocol: TCP
-#     resources:
-#       limits:
-#         cpu: 500m
-#         memory: 500Mi
-#       requests:
-#         cpu: 100m
-#         memory: 100Mi
-#     env:
-#       - name: "USEFUL_VAR"
-#         value: "perhaps-true"
-
-# Custom TLS certificate. Disabled unless tls.secretName has a value.
-  tls:
-    secretName: ""  # should correspond to a Kubernetes Secret resource to load
-    certificateFile: "tls.crt"
-    privateKeyFile: "tls.key"
-    caFile: ""  # optionally configure Postgres with a CA certificate
-    caSecretName: "" # optionally the ca.crt can come from this secret instead.
-# file names can be also defined with absolute path, and will no longer be relative
-# to the "/tls/" path where the secret is being mounted by default, and "/tlsca/"
-# where the caSecret is mounted by default.
-# When TLS is enabled, also set spiloFSGroup parameter above to the relevant value.
-# if unknown, set it to 103 which is the usual value in the default spilo images.
-# In Openshift, there is no need to set spiloFSGroup/spilo_fsgroup.
-
-# Add node affinity support by allowing postgres pods to schedule only on nodes that
-# have label: "postgres-operator:enabled" set.
-#  nodeAffinity:
-#    requiredDuringSchedulingIgnoredDuringExecution:
-#      nodeSelectorTerms:
-#        - matchExpressions:
-#            - key: postgres-operator
-#              operator: In
-#              values:
-#                - enabled
-
-# Enables change data capture streams for defined database tables
-#  streams:
-#  - applicationId: test-app
-#    database: foo
-#    tables:
-#      data.state_pending_outbox:
-#        eventType: test-app.status-pending
-#      data.state_approved_outbox:
-#        eventType: test-app.status-approved
-#      data.orders_outbox:
-#        eventType: test-app.order-completed
-#        idColumn: o_id
-#        payloadColumn: o_payload
-#    # Optional. Filter ignores events before a certain txnId and lsn. Can be used to skip bad events
-#    filter:
-#      data.orders_outbox: "[?(@.source.txId > 500 && @.source.lsn > 123456)]"
-#    batchSize: 1000
+  name: postgresql-operator-default-configuration
+configuration:
+  docker_image: ghcr.io/zalando/spilo-15:2.1-p9
+  # enable_crd_registration: true
+  # crd_categories:
+  # - all
+  # enable_lazy_spilo_upgrade: false
+  enable_pgversion_env_var: true
+  # enable_shm_volume: true
+  enable_spilo_wal_path_compat: false
+  enable_team_id_clustername_prefix: false
+  etcd_host: ""
+  # ignore_instance_limits_annotation_key: ""
+  # kubernetes_use_configmaps: false
+  max_instances: -1
+  min_instances: -1
+  resync_period: 30m
+  repair_period: 5m
+  # set_memory_request_to_limit: false
+  # sidecars:
+  # - image: image:123
+  #   name: global-sidecar-1
+  #   ports:
+  #   - containerPort: 80
+  #     protocol: TCP
+  workers: 8
+  users:
+    # additional_owner_roles: 
+    # - cron_admin
+    enable_password_rotation: false
+    password_rotation_interval: 90
+    password_rotation_user_retention: 180
+    replication_username: standby
+    super_username: postgres
+  major_version_upgrade:
+    major_version_upgrade_mode: "off"
+    # major_version_upgrade_team_allow_list:
+    # - acid
+    minimal_major_version: "11"
+    target_major_version: "15"
+  kubernetes:
+    # additional_pod_capabilities:
+    # - "SYS_NICE"
+    cluster_domain: cluster.local
+    cluster_labels:
+      application: spilo
+    cluster_name_label: cluster-name
+    # custom_pod_annotations:
+    #   keya: valuea
+    #   keyb: valueb
+    # delete_annotation_date_key: delete-date
+    # delete_annotation_name_key: delete-clustername
+    # downscaler_annotations:
+    # - deployment-time
+    # - downscaler/*
+    # enable_cross_namespace_secret: "false"
+    enable_init_containers: true
+    enable_pod_antiaffinity: false
+    enable_pod_disruption_budget: true
+    enable_readiness_probe: false
+    enable_sidecars: true
+    # ignored_annotations:
+    # - k8s.v1.cni.cncf.io/network-status
+    # infrastructure_roles_secret_name: "postgresql-infrastructure-roles"
+    # infrastructure_roles_secrets:
+    # - secretname: "monitoring-roles"
+    #   userkey: "user"
+    #   passwordkey: "password"
+    #   rolekey: "inrole"
+    # - secretname: "other-infrastructure-role"
+    #   userkey: "other-user-key"
+    #   passwordkey: "other-password-key"
+    # inherited_annotations:
+    # - owned-by
+    # inherited_labels:
+    # - application
+    # - environment
+    master_pod_move_timeout: 20m
+    # node_readiness_label:
+    #   status: ready
+    # node_readiness_label_merge: "OR"
+    oauth_token_secret_name: postgresql-operator
+    pdb_name_format: "postgres-{cluster}-pdb"
+    pod_antiaffinity_preferred_during_scheduling: false
+    pod_antiaffinity_topology_key: "kubernetes.io/hostname"
+    # pod_environment_configmap: "default/my-custom-config"
+    # pod_environment_secret: "my-custom-secret"
+    pod_management_policy: "ordered_ready"
+    # pod_priority_class_name: "postgres-pod-priority"
+    pod_role_label: spilo-role
+    # pod_service_account_definition: ""
+    pod_service_account_name: postgres-pod
+    # pod_service_account_role_binding_definition: ""
+    pod_terminate_grace_period: 5m
+    secret_name_template: "{username}.{cluster}.credentials.{tprkind}.{tprgroup}"
+    share_pgsocket_with_sidecars: false
+    spilo_allow_privilege_escalation: true
+    # spilo_runasuser: 101
+    # spilo_runasgroup: 103
+    # spilo_fsgroup: 103
+    spilo_privileged: false
+    storage_resize_mode: pvc
+    # toleration:
+    #   key: db-only
+    #   operator: Exists
+    #   effect: NoSchedule
+    # watched_namespace: ""
+  postgres_pod_resources:
+    default_cpu_limit: "1"
+    default_cpu_request: 100m
+    default_memory_limit: 500Mi
+    default_memory_request: 100Mi
+    # max_cpu_request: "1"
+    # max_memory_request: 4Gi
+    # min_cpu_limit: 250m
+    # min_memory_limit: 250Mi
+  timeouts:
+    patroni_api_check_interval: 1s
+    patroni_api_check_timeout: 5s
+    pod_label_wait_timeout: 10m
+    pod_deletion_wait_timeout: 10m
+    ready_wait_interval: 4s
+    ready_wait_timeout: 30s
+    resource_check_interval: 3s
+    resource_check_timeout: 10m
+  load_balancer:
+    # custom_service_annotations:
+    #   keyx: valuex
+    #   keyy: valuey
+    # db_hosted_zone: ""
+    enable_master_load_balancer: false
+    enable_master_pooler_load_balancer: false
+    enable_replica_load_balancer: false
+    enable_replica_pooler_load_balancer: false
+    external_traffic_policy: "Cluster"
+    master_dns_name_format: "{cluster}.{namespace}.{hostedzone}"
+    # master_legacy_dns_name_format: "{cluster}.{team}.{hostedzone}"
+    replica_dns_name_format: "{cluster}-repl.{namespace}.{hostedzone}"
+    # replica_dns_old_name_format: "{cluster}-repl.{team}.{hostedzone}"
+  aws_or_gcp:
+    # additional_secret_mount: "some-secret-name"
+    # additional_secret_mount_path: "/some/dir"
+    aws_region: us-west-2
+    enable_ebs_gp3_migration: false
+    # enable_ebs_gp3_migration_max_size: 1000
+    # gcp_credentials: ""
+    # kube_iam_role: ""
+    # log_s3_bucket: ""
+    # wal_az_storage_account: ""
+    # wal_gs_bucket: ""
+    # wal_s3_bucket: ""
+  logical_backup:
+    # logical_backup_azure_storage_account_name: ""
+    # logical_backup_azure_storage_container: ""
+    # logical_backup_azure_storage_account_key: ""
+    # logical_backup_cpu_limit: ""
+    # logical_backup_cpu_request: ""
+    # logical_backup_memory_limit: ""
+    # logical_backup_memory_request: ""
+    logical_backup_docker_image: "registry.opensource.zalan.do/acid/logical-backup:v1.8.2"
+    # logical_backup_google_application_credentials: ""
+    logical_backup_job_prefix: "logical-backup-"
+    logical_backup_provider: "s3"
+    # logical_backup_s3_access_key_id: ""
+    logical_backup_s3_bucket: "my-bucket-url"
+    # logical_backup_s3_endpoint: ""
+    # logical_backup_s3_region: ""
+    # logical_backup_s3_secret_access_key: ""
+    logical_backup_s3_sse: "AES256"
+    # logical_backup_s3_retention_time: ""
+    logical_backup_schedule: "30 00 * * *"
+  debug:
+    debug_logging: true
+    enable_database_access: true
+  teams_api:
+    # enable_admin_role_for_users: true
+    # enable_postgres_team_crd: false
+    # enable_postgres_team_crd_superusers: false
+    enable_team_member_deprecation: false
+    enable_team_superuser: false
+    enable_teams_api: false
+    # pam_configuration: ""
+    pam_role_name: zalandos
+    # postgres_superuser_teams:
+    # - postgres_superusers
+    protected_role_names:
+    - admin
+    - cron_admin
+    role_deletion_suffix: "_deleted"
+    team_admin_role: admin
+    team_api_role_configuration:
+      log_statement: all
+    # teams_api_url: ""
+  logging_rest_api:
+    api_port: 8080
+    cluster_history_entries: 1000
+    ring_log_lines: 100
+  connection_pooler:
+    connection_pooler_default_cpu_limit: "1"
+    connection_pooler_default_cpu_request: "500m"
+    connection_pooler_default_memory_limit: 100Mi
+    connection_pooler_default_memory_request: 100Mi
+    connection_pooler_image: "registry.opensource.zalan.do/acid/pgbouncer:master-26"
+    # connection_pooler_max_db_connections: 60
+    connection_pooler_mode: "transaction"
+    connection_pooler_number_of_instances: 2
+    # connection_pooler_schema: "pooler"
+    # connection_pooler_user: "pooler"
+  # patroni:
+    # failsafe_mode: "false"
