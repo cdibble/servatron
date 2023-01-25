@@ -36,7 +36,9 @@ install () {
     sudo apt -y update && sudo apt -y upgrade
     # Install k3s
     echo 'installing k3s'
-    curl -sfL https://get.k3s.io | sh -
+    # curl -sfL https://get.k3s.io | sh -
+    # TRAEFIK_COMMAND='--disable-traefik'
+    INSTALL_K3S_EXEC='server $TRAEFIK_COMMAND --disable-servicelb' curl -sfL https://get.k3s.io | sh -
     # Get the kubernetes token and IP for the main node
     TOKEN=$(sudo cat /var/lib/rancher/k3s/server/node-token)
     # IP=$(multipass info k3s-control-plane | grep IPv4 | awk '{print $2}')
@@ -48,8 +50,9 @@ install () {
     # done
     # Change owner and permissions of kube config
     # echo 'getting kube config'
-    # sudo chown ubuntu:ubuntu /etc/rancher/k3s/k3s.yaml
-    # sudo chmod 744 /etc/rancher/k3s/k3s.yaml
+    sudo chown "$LOGNAME:$LOGNAME" /etc/rancher/k3s/k3s.yaml
+    sudo chmod 744 /etc/rancher/k3s/k3s.yaml
+    sudo echo -n "cgroup_memory=1 cgroup_enable=memory" >> /boot/cmdline.txt
     # Copy Kube Config to local
     # multipass copy-files k3s-control-plane:/etc/rancher/k3s/k3s.yaml .
 }
@@ -64,6 +67,10 @@ install_helm () {
     curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
     chmod 700 get_helm.sh
     ./get_helm.sh
+}
+
+uninstall_k3s () {
+  /usr/local/bin/k3s-uninstall.sh
 }
 
 # Multipass Port Forwarding to Host
