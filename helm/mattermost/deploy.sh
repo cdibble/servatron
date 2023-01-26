@@ -15,8 +15,7 @@ install () {
   USERNAME=mattermost && \
   DB_NAME=mattermost && \
   # Create the Postgres role and database, grant privelages on the database to the role
-  sudo -u postgres bahs -c
-  sudo -u postgres bash "psql -U postgres -c \"CREATE ROLE $USERNAME PASSWORD \'{$MATTERMOST_PGPASSWORD}\' SUPERUSER CREATEDB CREATEROLE INHERIT LOGIN;\" "  && \
+  sudo -u postgres bash -c "psql -U postgres -c \"CREATE ROLE $USERNAME PASSWORD '$MATTERMOST_PGPASSWORD' SUPERUSER CREATEDB CREATEROLE INHERIT LOGIN;\" "  && \
   psql -U postgres -c "CREATE DATABASE $DBNAME OWNER $USERNAME;"  && \
   psql -U postgres -c "GRANT CONNECT ON $DBNAME TO $USERNAME; GRANT USAGE ON SCHEMA public TO $USERNAME; GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO $USERNAME;"  && \
   
