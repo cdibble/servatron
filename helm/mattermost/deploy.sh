@@ -16,8 +16,8 @@ install () {
   DB_NAME=mattermost && \
   # Create the Postgres role and database, grant privelages on the database to the role
   sudo -u postgres bash -c "psql -U postgres -c \"CREATE ROLE $USERNAME PASSWORD '$MATTERMOST_PGPASSWORD' SUPERUSER CREATEDB CREATEROLE INHERIT LOGIN;\" "  && \
-  psql -U postgres -c "CREATE DATABASE $DBNAME OWNER $USERNAME;"  && \
-  psql -U postgres -c "GRANT CONNECT ON $DBNAME TO $USERNAME; GRANT USAGE ON SCHEMA public TO $USERNAME; GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO $USERNAME;"  && \
+  psql -U mattermost -c "CREATE DATABASE $DBNAME OWNER $USERNAME;"  && \
+  psql -U mattermost -c "GRANT CONNECT ON $DBNAME TO $USERNAME; GRANT USAGE ON SCHEMA public TO $USERNAME; GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO $USERNAME;"  && \
   
   # MATTERMOST_HOST=$(kubectl get service/timescaledb -n timescaledb -o yaml | grep "ingress:" -A 1 | grep "\s[0-9\.]*" -o | xargs)
   CONN_STR="$USERNAME:$MATTERMOST_PGPASSWORD@$MATTERMOST_HOST:5432/$DB_NAME?sslmode=require&connect_timeout=10" && \
