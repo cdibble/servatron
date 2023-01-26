@@ -34,10 +34,9 @@ timescaledb_mp: metallb
 	helm/timescaledb/deploy_multipass.sh install_psql
 	helm/timescaledb/deploy_multipass.sh connect
 
-mattermost: timescaledb
+mattermost:
 	helm/mattermost/deploy.sh install
 	helm/mattermost/deploy.sh get_ip
-	helm/mattermost/deploy.sh open_mattermost
 
 mattermost_mp: timescaledb_multipass
 	helm/mattermost/deploy_multipass.sh install
