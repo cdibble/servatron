@@ -3,26 +3,24 @@
 install () {
   echo "installing"
   # multipass mount $LOCAL_DB_PATH k3s-control-plane:$POD_DB_PATH
-  helm repo add mattermost https://helm.mattermost.com
-  helm repo update
+  helm repo add mattermost https://helm.mattermost.com && \
+  helm repo update && \
   # export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-  if [[ -z $MATTERMOST_PGPASSWORD ]];then
-    MATTERMOST_PGPASSWORD=$(kubectl get secret --namespace timescaledb timescaledb-credentials -o jsonpath="{.data.PATRONI_SUPERUSER_PASSWORD}" | base64 --decode)
-  if
-  if [[ -z $MATTERMOST_HOST ]];then
-    MATTERMOST_HOST=$(kubectl get service/timescaledb -n timescaledb -o yaml | grep "clusterIPs:" -A 1 | grep "\s[0-9\.]*" -o | xargs)
-  fi
-  
-  USERNAME=mattermost
-  DB_NAME=mattermost
+  # if [[ -z $MATTERMOST_PGPASSWORD ]];then
+  #   MATTERMOST_PGPASSWORD=$(kubectl get secret --namespace timescaledb timescaledb-credentials -o jsonpath="{.data.PATRONI_SUPERUSER_PASSWORD}" | base64 --decode)
+  # fi
+  # if [[ -z $MATTERMOST_HOST ]];then
+  #   MATTERMOST_HOST=$(kubectl get service/timescaledb -n timescaledb -o yaml | grep "clusterIPs:" -A 1 | grep "\s[0-9\.]*" -o | xargs)
+  # fi
+  USERNAME=mattermost && \
+  DB_NAME=mattermost && \
   # Create the Postgres role and database, grant privelages on the database to the role
-  psql -U postgres -c "CREATE ROLE $USERNAME PASSWORD \'{$MATTERMOST_PGPASSWORD}\' SUPERUSER CREATEDB CREATEROLE INHERIT LOGIN;"
-  psql -U postgres -c "CREATE DATABASE $DBNAME OWNER $USERNAME;"
-  psql -U postgres -c "GRANT CONNECT ON $DBNAME TO $USERNAME; GRANT USAGE ON SCHEMA public TO $USERNAME; GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO $USERNAME;"
+  psql -U postgres -c "CREATE ROLE $USERNAME PASSWORD \'{$MATTERMOST_PGPASSWORD}\' SUPERUSER CREATEDB CREATEROLE INHERIT LOGIN;"  && \
+  psql -U postgres -c "CREATE DATABASE $DBNAME OWNER $USERNAME;"  && \
+  psql -U postgres -c "GRANT CONNECT ON $DBNAME TO $USERNAME; GRANT USAGE ON SCHEMA public TO $USERNAME; GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO $USERNAME;"  && \
   
   # MATTERMOST_HOST=$(kubectl get service/timescaledb -n timescaledb -o yaml | grep "ingress:" -A 1 | grep "\s[0-9\.]*" -o | xargs)
-  
-  CONN_STR="$USERNAME:$MATTERMOST_PGPASSWORD@$MATTERMOST_HOST:5432/$DB_NAME?sslmode=require&connect_timeout=10"
+  CONN_STR="$USERNAME:$MATTERMOST_PGPASSWORD@$MATTERMOST_HOST:5432/$DB_NAME?sslmode=require&connect_timeout=10" && \
   # echo $CONN_STR && \
   helm upgrade --install mattermost mattermost/mattermost-team-edition \
     --set mysql.enabled=false \
@@ -37,7 +35,7 @@ install () {
     --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.entrypoints"=web \
     --set ingress.annotations."cert-manager\.io\/cluster-issuer"=selfsigned-cluster-issuer \
     -n mattermost \
-    --create-namespace && \
+    --create-namespace
   # kubectl get svc -n mattermost
 }
 
