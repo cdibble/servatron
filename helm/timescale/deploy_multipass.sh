@@ -1,19 +1,27 @@
 # !/bin/bash
 # TimescaleDB Helm Chart Deployment
 install () {
-  POD_DB_PATH=/var/lib/rancher/k3s/storage/timescaledb
+  LOCAL_DB_PATH=/opt/var/lib/postgresql/k3s
+  sudo mkdir -p $LOCAL_DB_PATH
+  POD_DB_PATH=/var/lib/rancher/k3s/storage
+  echo 'mounting'
+  multipass mount $LOCAL_DB_PATH k3s-control-plane:$POD_DB_PATH
+  multipass exec k3s-control-plane -- sh -c "
   helm repo add timescale 'https://charts.timescale.com' && \
   helm repo update && \
   KUBECONFIG=/etc/rancher/k3s/k3s.yaml helm upgrade --install timescaledb timescale/timescaledb-single \
-    --set persistentVolumes.data.size=5Gi \
+    --set persistentVolumes.data.size=50Gi \
     --set persistentVolumes.data.storageClass=local-path \
     --set persistentVolumes.data.mountPath=$POD_DB_PATH \
     -n timescaledb \
     --create-namespace
+  "
 }
 
 get_pg_pw () {
-  PGPOSTGRESPASSWORD=$(kubectl get secret --namespace timescaledb timescaledb-credentials -o jsonpath="{.data.PATRONI_SUPERUSER_PASSWORD}" | base64 --decode)
+  PGPOSTGRESPASSWORD=$(multipass exec k3s-control-plane -- sh -c "
+  kubectl get secret --namespace timescaledb timescaledb-credentials -o jsonpath="{.data.PATRONI_SUPERUSER_PASSWORD}" | base64 --decode
+  ")
   echo $PGPOSTGRESPASSWORD
 }
 
@@ -22,18 +30,22 @@ get_pg_host () {
   # HOST_IP=$(multipass exec k3s-control-plane -- sh -c "
   # kubectl get service/timescaledb -n timescaledb -o yaml | grep ingress -A 1 | awk '{print $4}'
   # ")
-  HOST_IP=$(kubectl get service/timescaledb -n timescaledb -o yaml | grep 'ingress:' -A 1 | grep '\s[0-9\.]*' -o | xargs)
+  HOST_IP=$(multipass exec k3s-control-plane -- sh -c "kubectl get service/timescaledb -n timescaledb -o yaml | grep 'ingress:' -A 1 | grep '\s[0-9\.]*' -o | xargs")
   echo $HOST_IP
 }
 
 connect () {
   HOST_IP=$(get_pg_host)
   PGPASS=$(get_pg_pw)
-  PGPASSWORD=$PGPASS psql -U postgres -h $HOST_IP postgres
+  multipass exec k3s-control-plane -- sh -c "
+    PGPASSWORD=$PGPASS psql -U postgres -h $HOST_IP postgres
+  "
 }
 
 connect_pod_tunnel () {
-  kubectl exec -ti timescaledb-0 -n timescaledb -- /usr/lib/postgresql/14/bin/psql
+  multipass exec k3s-control-plane -- sh -c "
+    kubectl exec -ti timescaledb-0 -n timescaledb -- /usr/lib/postgresql/14/bin/psql
+  "
 }
 
 
@@ -46,12 +58,16 @@ install_psql () {
     echo "installing psql-$1"
   fi
   echo $psql_version
-  echo $psql_version > psql_version.txt
-
-  sudo sh -c ''echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list''
-  wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-  sudo apt-get update
-  sudo apt-get install -y postgresql-$(cat psql_version.txt)
+multipass exec k3s-control-plane -- sh -c "echo $psql_version > psql_version.txt"
+multipass exec k3s-control-plane -- sh -c '
+cat << EOF > psql_install.txt
+sudo sh -c ''echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list''
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+sudo apt-get update
+sudo apt-get install -y postgresql-$(cat psql_version.txt)
+EOF
+'
+  multipass exec k3s-control-plane -- sh -c "cat psql_install.txt | sh"
 }
 
 # cat << EOF > command.txt
