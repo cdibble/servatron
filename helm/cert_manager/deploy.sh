@@ -1,17 +1,25 @@
 # !/bin/bash
 # Cert Manager Helm Chart Deployment
-install () {
+install_mp () {
   multipass exec k3s-control-plane -- sh -c "
   kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.9.1/cert-manager.yaml
   "
 }
 
+install() {
+  kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.9.1/cert-manager.yaml
+}
 
-apply_cluster_issuer () {
+apply_cluster_issuer_mp () {
   multipass transfer ./cluster_issuer_manifest.yaml k3s-control-plane:.
   multipass exec k3s-control-plane -- sh -c "
   kubectl apply -f ./cluster_issuer_manifest.yaml -n cert-manager
   "
+}
+
+
+apply_cluster_issuer () {
+  kubectl apply -f ./cluster_issuer_manifest.yaml -n cert-manager
 }
 
 

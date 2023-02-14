@@ -7,8 +7,13 @@ kube_worker: kube_cp
 k3s:
 	k3s/deploy.sh install
 
-helm: kube_cp
+helm_mp: kube_cp
 	k3s/deploy/install_helm.sh
+
+helm: k3s
+	curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+	chmod 700 get_helm.sh
+	./get_helm.sh
 
 killall:
 	k3s/deploy/uninstall_vms.sh
@@ -20,7 +25,7 @@ metallb_multipass: ngnix
 	helm/metallb/deploy_multipass.sh install
 	helm/metallb/deploy_multipass.sh apply_l2_config
 
-metallb: k3s
+metallb: k3s, helm
 	helm/metallb/deploy.sh install
 	helm/metallb/deploy.sh apply_l2_config
 
