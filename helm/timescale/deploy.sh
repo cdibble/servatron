@@ -5,7 +5,7 @@ install () {
   helm repo add timescale 'https://charts.timescale.com' && \
   helm repo update && \
   KUBECONFIG=/etc/rancher/k3s/k3s.yaml helm upgrade --install timescaledb timescale/timescaledb-single \
-    --set persistentVolumes.data.size=5Gi \
+    --set persistentVolumes.data.size=250Gi \
     --set persistentVolumes.data.storageClass=local-path \
     --set persistentVolumes.data.mountPath=$POD_DB_PATH \
     -n timescaledb \
