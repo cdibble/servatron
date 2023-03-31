@@ -1,9 +1,9 @@
 # Servatron: self-hosted
-I don't always run servers in closets, but when I do, it's using this infrastructure.
+This started as a way to play with self-hosting using old laptops as nodes in a k3s cluster. Since I have a couple of old Macs around, it used `multipass` to manage VMs and `k3s` to deploy things into a kubernetes cluster.
 
-Implements `k3s` using `multipass` to manage local VMs as nodes.
+Then I got a Raspberry Pi and so I wanted to be able to ditch multipass.
 
-Helm charts for playing around with FOSS projects are in here as well.
+There are bits of this repo that are more mature than others, and some things just implemented for fun (e.g., CLI sugar with `gum`). Sooner or later, it should be a collection of implementations of local FOSS projects that I'm curious to self-host.
 
 ## Options for k8s locally
 There are many. Here are a few I looked at.
