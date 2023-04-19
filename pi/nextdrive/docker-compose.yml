@@ -1,6 +1,6 @@
 # https://github.com/docker/awesome-compose/tree/master/nextcloud-postgres
 services:
-  nextcloud:
+  nc:
     image: nextcloud:apache
     environment:
       - POSTGRES_HOST=db
@@ -12,7 +12,7 @@ services:
     restart: always
     volumes:
       - nc_data:/var/www/html
-  nextcloud_postgres:
+  db:
     image: postgres:alpine
     environment:
       - POSTGRES_PASSWORD=nextcloud
