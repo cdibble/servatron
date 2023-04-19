@@ -21,8 +21,11 @@ install () {
   
   # MATTERMOST_HOST=$(kubectl get service/timescaledb -n timescaledb -o yaml | grep "ingress:" -A 1 | grep "\s[0-9\.]*" -o | xargs)
   CONN_STR="$USERNAME:$MATTERMOST_PGPASSWORD@$MATTERMOST_HOST:5432/$DB_NAME?sslmode=require&connect_timeout=10" && \
+  MATTERMOST_IP=192.168.1.241
+  # CONN_STR="mattermost:$MATTERMOST_PGPASSWORD@localhost:5432/mattermost?sslmode=require&connect_timeout=10" && \
   # echo $CONN_STR && \
-  helm upgrade --install mattermost mattermost/mattermost-team-edition \
+  export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+  KUBECONFIG=/etc/rancher/k3s/k3s.yaml helm upgrade --install mattermost mattermost/mattermost-team-edition \
     --set mysql.enabled=false \
     --set externalDB.enabled=true \
     --set externalDB.externalDriverType=postgres \

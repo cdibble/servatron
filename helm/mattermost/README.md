@@ -4,6 +4,10 @@ This is a FOSS alternative to Slack et al.
 
 I'm just playing with it.
 
+
+## Requirements
+Helm chart deeply [assumes](https://forum.mattermost.com/t/raspberry-pi-4-mattermost-inside-docker/8112) AMD64 arch. There are instructions for running it natively on Pi [here](https://github.com/justinegeffen/mattermost_raspberrypi_recipe/blob/master/README.md).
+
 ## Installation
 Install or Upgrade on the control plane node
 ```bash

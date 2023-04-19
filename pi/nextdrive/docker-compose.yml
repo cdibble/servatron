@@ -1,0 +1,28 @@
+# https://github.com/docker/awesome-compose/tree/master/nextcloud-postgres
+services:
+  nextcloud:
+    image: nextcloud:apache
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_PASSWORD=nextcloud
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+    ports:
+      - 80:80
+    restart: always
+    volumes:
+      - nc_data:/var/www/html
+  nextcloud_postgres:
+    image: postgres:alpine
+    environment:
+      - POSTGRES_PASSWORD=nextcloud
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+    restart: always
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    expose:
+      - 5432
+volumes:
+  db_data:
+  nc_data:
