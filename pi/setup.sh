@@ -15,7 +15,7 @@ setup_github () {
 
 add_k3s_user () {
     sudo groupadd k3s
-    sudo useradd -u 666 -g k3s -m k3s -p TF8jQJbbYELJ7JpHCkgs9S
+    sudo useradd -u 666 -g k3s -m k3s -p $K3S_USER_PASSWORD
 }
 
 add_bashrc () {
