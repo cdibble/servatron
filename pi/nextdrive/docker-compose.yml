@@ -4,15 +4,31 @@ services:
   nc:
     image: nextcloud:apache
     environment:
+      - REDIS_HOST=redis
       - POSTGRES_HOST=db
       - POSTGRES_PASSWORD=nextcloud
       - POSTGRES_DB=nextcloud
       - POSTGRES_USER=nextcloud
+    networks:
+      - redisnet
+      - dbnet
     ports:
-      - 80:80
+      - 8080:80
     restart: always
     volumes:
       - nc_data:/var/www/html
+    depends_on:
+      - db
+      - redis
+
+  redis:
+    image: redis:alpine
+    restart: always
+    networks:
+      - redisnet
+    expose:
+      - 6379
+  
   db:
     image: postgres:alpine
     environment:
@@ -20,6 +36,8 @@ services:
       - POSTGRES_DB=nextcloud
       - POSTGRES_USER=nextcloud
     restart: always
+    networks:
+      - dbnet
     volumes:
       - db_data:/var/lib/postgresql/data
     expose:
@@ -27,3 +45,6 @@ services:
 volumes:
   db_data:
   nc_data:
+networks:
+  dbnet:
+  redisnet:
