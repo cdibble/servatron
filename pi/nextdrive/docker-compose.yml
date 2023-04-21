@@ -1,7 +1,7 @@
 # https://github.com/docker/awesome-compose/tree/master/nextcloud-postgres
 version: '3.0'
 services:
-  nc:
+  nextcloud:
     image: nextcloud:apache
     environment:
       - REDIS_HOST=redis
@@ -18,7 +18,7 @@ services:
     volumes:
       - nc_data:/var/www/html
     depends_on:
-      - db
+      - nextcloud_postgres
       - redis
 
   redis:
@@ -29,7 +29,7 @@ services:
     expose:
       - 6379
   
-  db:
+  nextcloud_postgres:
     image: postgres:alpine
     environment:
       - POSTGRES_PASSWORD=nextcloud

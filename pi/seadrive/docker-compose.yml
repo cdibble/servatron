@@ -1,6 +1,6 @@
 version: '2.0'
 services:
-  db:
+  seafile_db:
     image: mariadb:10.6
     container_name: seafile-mysql
     environment:
@@ -35,7 +35,7 @@ services:
       - SEAFILE_SERVER_LETSENCRYPT=false   # Whether to use https or not.
       - SEAFILE_SERVER_HOSTNAME=docs.seafile.com # Specifies your host name if https is enabled.
     depends_on:
-      - db
+      - seafile_db
       - memcached
     networks:
       - seafile-net
