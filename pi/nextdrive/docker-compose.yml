@@ -5,7 +5,7 @@ services:
     image: nextcloud:apache
     environment:
       - REDIS_HOST=redis
-      - POSTGRES_HOST=db
+      - POSTGRES_HOST=nextcloud_postgres
       - POSTGRES_PASSWORD=nextcloud
       - POSTGRES_DB=nextcloud
       - POSTGRES_USER=nextcloud
@@ -18,7 +18,7 @@ services:
     volumes:
       - nc_data:/var/www/html
     depends_on:
-      - nextcloud_postgres
+      - db
       - redis
 
   redis:
@@ -29,8 +29,9 @@ services:
     expose:
       - 6379
   
-  nextcloud_postgres:
+  db:
     image: postgres:alpine
+    hostname: nextcloud_postgres
     environment:
       - POSTGRES_PASSWORD=nextcloud
       - POSTGRES_DB=nextcloud
