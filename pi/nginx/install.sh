@@ -14,9 +14,11 @@ rm_defaults () {
 
 setup_nginx_servers () {
     # create config for seafile nginx
-    sudo cp ./nginx_confs/* /etc/nginx/sites-available
     for file in ./nginx_confs/*; do
-        sudo cp ./nginx_confs/$file /etc/nginx/sites-available/$file
-        sudo ln -s /etc/nginx/sites-available/$file /etc/nginx/sites-enabled/$file
+        filename=$(basename $file)
+        echo $filename
+        sudo cp ${file}  /etc/nginx/sites-available/${filename};
+        sudo ln -s /etc/nginx/sites-available/$filename /etc/nginx/sites-enabled/$filename
+    done
     sudo service nginx restart
 }
