@@ -5,7 +5,9 @@ metadata:
   namespace: postgres
 configuration:
   # docker_image: ghcr.io/zalando/spilo-15:2.1-p9
-  docker_image: ghcr.io/pluralsh/spilo-14:latest
+  # docker_image: ghcr.io/pluralsh/spilo-14:latest
+  # get multiarch image, buried here: https://github.com/mmoscher/spilo/pkgs/container/spilo-14
+  docker_image: ghcr.io/mmoscher/spilo-14:p1-2@sha256:7ca0406d9879e496863e09a285a48bcb7f4da1179ffb139938e0a8488c780fa3
   # enable_crd_registration: true
   # crd_categories:
   # - all
@@ -30,7 +32,7 @@ configuration:
   #     protocol: TCP
   workers: 8
   users:
-    # additional_owner_roles: 
+    # additional_owner_roles:
     # - cron_admin
     enable_password_rotation: false
     password_rotation_interval: 90
@@ -189,8 +191,8 @@ configuration:
     # postgres_superuser_teams:
     # - postgres_superusers
     protected_role_names:
-    - admin
-    - cron_admin
+      - admin
+      - cron_admin
     role_deletion_suffix: "_deleted"
     team_admin_role: admin
     team_api_role_configuration:
@@ -212,4 +214,4 @@ configuration:
     # connection_pooler_schema: "pooler"
     # connection_pooler_user: "pooler"
   # patroni:
-    # failsafe_mode: "false"
+  # failsafe_mode: "false"

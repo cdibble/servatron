@@ -12,6 +12,8 @@ install () {
   # if [[ -z $MATTERMOST_HOST ]];then
   #   MATTERMOST_HOST=$(kubectl get service/timescaledb -n timescaledb -o yaml | grep "clusterIPs:" -A 1 | grep "\s[0-9\.]*" -o | xargs)
   # fi
+  MATTERMOST_PGPASSWORD='d3$iBJNSNpCTaR4ro878FY4$P5Jqd'
+  MATTERMOST_HOST=localhost
   USERNAME=mattermost && \
   DB_NAME=mattermost && \
   # Create the Postgres role and database, grant privelages on the database to the role
@@ -32,16 +34,28 @@ install () {
     --set externalDB.externalConnectionString=$CONN_STR \
     --set service.type=LoadBalancer \
     --set ingress.enabled=true \
-    --set ingress.hosts="{mattermost.tuerto.net}" \
     --set ingress.path="/" \
     --set ingress.annotations."kubernetes\.io\/ingress\.class"=traefik \
     --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.entrypoints"=web \
     --set ingress.annotations."cert-manager\.io\/cluster-issuer"=selfsigned-cluster-issuer \
     -n mattermost \
     --create-namespace
+    # --set ingress.hosts="{mattermost.tuerto.net}" \
   # kubectl get svc -n mattermost
 }
 
+get_image () {
+  wget https://github.com/SmartHoneybee/ubiquitous-memory/releases/download/v7.5.2/mattermost-v7.5.2-linux-arm.tar.gz
+  sudo tar -xvf mattermost-v7.5.2-linux-arm.tar.gz
+}
+
+full_wipe_mattermost () {
+  helm delete mattermost -n mattermost
+  sudo su - postgres bash -c "psql -c 'drop database mattermost'"
+  sudo su - postgres bash -c "psql -c 'drop owned by  mattermost'"
+  sudo su - postgres bash -c "psql -c 'drop role mattermost'"
+  
+}
 
 get_ip () {
   MATTERMOST_IP=$(kubectl get services --namespace mattermost mattermost-team-edition --output jsonpath='{.status.loadBalancer.ingress[0].ip}')
