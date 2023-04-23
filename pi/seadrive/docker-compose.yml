@@ -34,8 +34,9 @@ services:
       - SEAFILE_ADMIN_EMAIL=me@example.com # Specifies Seafile admin user, default is 'me@example.com'.
       - SEAFILE_ADMIN_PASSWORD=asecret     # Specifies Seafile admin password, default is 'asecret'.
       - SEAFILE_SERVER_LETSENCRYPT=false   # Whether to use https or not.
-      - SEAFILE_SERVER_HOSTNAME=192.168.0.154 # Specifies your host name if https is enabled.
-      - SEAFILE_FILE_SERVER_ROOT=192.168.0.154
+      - SEAFILE_SERVICE_URL=https://seafile.tuerto.net
+      - SEAFILE_SERVER_HOSTNAME=127.0.0.1 # Specifies your host name if https is enabled.
+      - SEAFILE_FILE_SERVER_ROOT=https://seafile.tuerto.net:8088
     depends_on:
       - db
       - memcached
