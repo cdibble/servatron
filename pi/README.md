@@ -16,7 +16,9 @@ Note, these `make` recipes are a work in progress- I'll rebuild with a full pull
 1. install `nginx`: `make install_nginx`
    1. configure `nginx`: `make configue_nginx`
 1. install `certbot`: `make install_certbot`
-1. start/enable `seadrive`: `make start_seadrive`
+   1. configure certs: `make configure_certbot`
+1. start/enable `seafile`: `make start_seafile`
    1. ENV vars:
-      1. a
+      1. `SEAFILE_ADMIN_EMAIL`
+      1. `SEAFILE_ADMIN_PASSWORD`
 1. start/enable `nextcloud`: `make start_nextcloud`
