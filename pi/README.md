@@ -21,4 +21,8 @@ Note, these `make` recipes are a work in progress- I'll rebuild with a full pull
    1. ENV vars:
       1. `SEAFILE_ADMIN_EMAIL`
       1. `SEAFILE_ADMIN_PASSWORD`
+      1. `SEAFILE_DB_PASSWORD`: sets the MySQL backend db password
 1. start/enable `nextcloud`: `make start_nextcloud`
+   1. ENV vars:
+      1. `NEXTCLOUD_POSTGRES_PASSWORD`
+1. Confirm that local volumes are persisted! Otherwise you'll lose data on reboots

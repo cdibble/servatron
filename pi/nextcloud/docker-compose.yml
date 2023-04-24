@@ -1,5 +1,5 @@
 # https://github.com/docker/awesome-compose/tree/master/nextcloud-postgres
-version: '3.0'
+version: "3.0"
 services:
   nextcloud:
     image: nextcloud:apache
@@ -31,7 +31,7 @@ services:
       - redisnet
     expose:
       - 6379
-  
+
   db:
     image: postgres:alpine
     hostname: nextcloud_postgres
