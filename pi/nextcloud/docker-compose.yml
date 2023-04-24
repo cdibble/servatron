@@ -9,6 +9,9 @@ services:
       - POSTGRES_PASSWORD=nextcloud
       - POSTGRES_DB=nextcloud
       - POSTGRES_USER=nextcloud
+      - NEXTCLOUD_TRUSTED_DOMAINS=nc.tuerto.net
+      - OVERWRITEPROTOCOL=https
+      - OVERWRITEHOST=nc.tuerto.net
     networks:
       - redisnet
       - dbnet
