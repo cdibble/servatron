@@ -1,8 +1,8 @@
 #!/bin/bash
 
 install () {
-    sudo apt-get install certbot
-    sudo apt-get install python3-certbot-nginx
+    sudo apt-get install -y certbot
+    sudo apt-get install -y python3-certbot-nginx
     # Get LetsEncrypt certificates. Note: requires forwarding port 80 so challenges work.
     sudo certbot --nginx \
         -d tuerto.net \
@@ -10,5 +10,8 @@ install () {
         -d seafile.tuerto.net \
         -d nc.tuerto.net \
         -d www.seafile.tuerto.net -d www.nc.tuerto.net
+}
+
+renew_certs () {
     sudo certbot renew
 }

@@ -2,7 +2,7 @@
 
 install () {
     sudo apt-get update
-    sudo apt-get install \
+    sudo apt-get install -y \
         ca-certificates \
         curl \
         gnupg
@@ -20,6 +20,8 @@ install () {
     # add conman user to docker group so we dont need to use root
     sudo usermod -aG docker conman
     newgrp docker
-    # start docker daemon
+    # start docker daemon; may require reboot.
     sudo service docker restart
+    # enable start on reboott
+    sudo systemctl enable docker.service
 }

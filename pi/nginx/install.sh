@@ -1,18 +1,18 @@
 #!/bin/bash
 
 install () {
-    sudo apt remove apache2
+    sudo apt remove -y apache2
     sudo apt install nginx -y
     sudo systemctl start nginx
     sudo systemctl enable nginx
 }
 
 rm_defaults () {
-    rm /etc/nginx/sites-enabled/default
-    rm /etc/nginx/sites-available/default
+    sudo rm /etc/nginx/sites-enabled/default
+    sudo rm /etc/nginx/sites-available/default
 }
 
-setup_nginx_servers () {
+configure_nginx () {
     # create config for seafile nginx
     for file in ./nginx_confs/*; do
         filename=$(basename $file)
@@ -20,5 +20,7 @@ setup_nginx_servers () {
         sudo cp ${file}  /etc/nginx/sites-available/${filename};
         sudo ln -s /etc/nginx/sites-available/$filename /etc/nginx/sites-enabled/$filename
     done
+    # add index file
+    sudo cp ./index.html /var/www/html/index.html
     sudo service nginx restart
 }
