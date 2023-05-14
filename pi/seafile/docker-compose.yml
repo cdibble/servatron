@@ -3,6 +3,7 @@ services:
   db:
     image: mariadb:10.6
     container_name: seafile-mysql
+    restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=db_dev # Requested, set the root's password of MySQL service.
       - MYSQL_LOG_CONSOLE=true
@@ -15,6 +16,7 @@ services:
   memcached:
     image: memcached:1.6.18
     container_name: seafile-memcached
+    restart: always
     entrypoint: memcached -m 256
     networks:
       - seafile-net
@@ -22,6 +24,7 @@ services:
   seafile:
     image: seafileltd/seafile-mc:latest
     container_name: seafile
+    restart: always
     ports:
       - "8088:80"
       # - "443:443"  # If https is enabled, cancel the comment.
