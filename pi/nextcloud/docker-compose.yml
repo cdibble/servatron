@@ -46,6 +46,16 @@ services:
       - db_data:/var/lib/postgresql/data
     expose:
       - 5432
+
+  cron:
+    image: nextcloud:apache
+    restart: always
+    volumes:
+      - nextcloud:/var/www/html
+    entrypoint: /cron.sh
+    depends_on:
+      - db
+      - redis
 volumes:
   db_data:
   nc_data:
