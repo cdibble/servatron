@@ -47,15 +47,23 @@ services:
     expose:
       - 5432
 
-  cron:
-    image: nextcloud:apache
-    restart: always
-    volumes:
-      - nextcloud:/var/www/html
-    entrypoint: /cron.sh
-    depends_on:
-      - db
-      - redis
+  # this should run background jos but I have found it doesnt work: https://github.com/nextcloud/docker/issues/1740
+  # cron:
+  #   image: nextcloud:apache
+  #   restart: always
+  #   user: www-data
+  #   environment:
+  #     - REDIS_HOST=redis
+  #     - POSTGRES_HOST=nextcloud_postgres
+  #     - POSTGRES_PASSWORD=nextcloud
+  #     - POSTGRES_DB=nextcloud
+  #     - POSTGRES_USER=nextcloud
+  #   volumes:
+  #     - nc_data:/var/www/html
+  #   entrypoint: /cron.sh
+  #   depends_on:
+  #     - db
+  #     - redis
 volumes:
   db_data:
   nc_data:
