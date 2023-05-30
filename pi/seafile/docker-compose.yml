@@ -31,9 +31,9 @@ services:
       - /opt/seafile-data:/shared # Requested, specifies the path to Seafile data persistent store.
       - /data/seafile-fuse:/seafile-fuse:rshared
     privileged: true # for sea-fuse mount point
-#    cap_add: # for sea-fuse mount point
-#      - SYS_ADMIN
-#      - MKNOD
+    #    cap_add: # for sea-fuse mount point
+    #      - SYS_ADMIN
+    #      - MKNOD
     environment:
       - DB_HOST=db
       - DB_ROOT_PASSWD=db_dev # Requested, the value shuold be root's password of MySQL service.
@@ -43,6 +43,7 @@ services:
       - SEAFILE_SERVER_LETSENCRYPT=false # Whether to use https or not.
       # - SEAFILE_SERVER_HOSTNAME=192.168.0.154 # Specifies your host name if https is enabled.
       # - SEAFILE_FILE_SERVER_ROOT=192.168.0.154
+      - NON_ROOT=true
       # NGINX:
       - SEAFILE_SERVICE_URL=https://www.seafile.tuerto.net
       - SEAFILE_SERVER_HOSTNAME=127.0.0.1 # Specifies your host name if https is enabled.
