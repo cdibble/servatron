@@ -24,12 +24,13 @@ services:
   seafile:
     image: seafileltd/seafile-mc:latest
     container_name: seafile
+    restart: always
     ports:
       - "8088:80"
       # - "443:443"  # If https is enabled, cancel the comment.
     volumes:
       - /opt/seafile-data:/shared # Requested, specifies the path to Seafile data persistent store.
-      - /data/seafile-fuse:/seafile-fuse:rshared
+      - /data/seafile-fuse:/seafile-fuse:shared
     privileged: true # for sea-fuse mount point
 #    cap_add: # for sea-fuse mount point
 #      - SYS_ADMIN
@@ -44,9 +45,9 @@ services:
       # - SEAFILE_SERVER_HOSTNAME=192.168.0.154 # Specifies your host name if https is enabled.
       # - SEAFILE_FILE_SERVER_ROOT=192.168.0.154
       # NGINX:
-      - SEAFILE_SERVICE_URL=https://www.seafile.tuerto.net
+      - SEAFILE_SERVICE_URL=https://seafile.tuerto.net
       - SEAFILE_SERVER_HOSTNAME=127.0.0.1 # Specifies your host name if https is enabled.
-      - SEAFILE_FILE_SERVER_ROOT=https://www.seafile.tuerto.net/seafhttp
+      - SEAFILE_FILE_SERVER_ROOT=https://seafile.tuerto.net/seafhttp
     depends_on:
       - db
       - memcached
