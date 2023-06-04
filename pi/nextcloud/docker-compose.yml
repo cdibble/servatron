@@ -20,6 +20,7 @@ services:
     restart: always
     volumes:
       - nc_data:/var/www/html
+      - /data/seafile-fuse/cddibble@gmail.com/032fa411-2033-4f08-8c41-c50dd0830067_Photos:/var/www/html/seafile-fuse/cddibble@gmail.com/Photos:shared
     depends_on:
       - db
       - redis
