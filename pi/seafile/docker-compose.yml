@@ -12,6 +12,8 @@ services:
       - /opt/seafile-mysql/db:/var/lib/mysql # Requested, specifies the path to MySQL data persistent store.
     networks:
       - seafile-net
+    # maintenance - allows passwordless login to mysql to for example change root password
+    # entrypoint: mysqld_safe --skip-grant-tables --user=root
 
   memcached:
     image: memcached:1.6.18
