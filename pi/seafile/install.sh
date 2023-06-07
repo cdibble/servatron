@@ -8,7 +8,8 @@ docker_up () {
 }
 
 mount_seafuse_filesystem () {
-   docker exec -ti seafile bash -c 'cd /opt/seafile/seafile-server-latest/ &&  ./seaf-fuse.sh start /seafile-fuse'
+  # must clean mount points or use -o nonempty
+  docker exec -ti seafile bash -c 'cd /opt/seafile/seafile-server-latest/ &&  ./seaf-fuse.sh start /seafile-fuse  -o nonempty'
 }
 
 create_container_user () {
