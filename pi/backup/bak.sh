@@ -29,15 +29,24 @@ bak_db () {
 	"
 	sudo docker cp seafile-mysql:/root/backup/databases/. /mnt/bak/seafile/mysql/
 }
-bak_data () {
-	# -a for archive; -z for compress; -S efficient sparse file handling
-	sudo rsync -azS /opt/seafile-data/seafile /mnt/bak/seafile/data/
-}
 
-setup_cron_bak () {
+setup_cron_bak_dbs () {
   # use system cron (root user) to run docker exec command (as www-data user) for nextcloud background jobs.
   sudo su -
-  cronline="0 0 * * * sudo rsync -azS /opt/seafile-data/seafile /mnt/bak/seafile/data/" 
+  cronline="0 0 * * * /.cron/seafile_mysql_dump.sh" 
+  (crontab -u $(whoami) -l; echo "$cronline" ) | crontab -u $(whoami) -
+  exit
+}
+
+bak_data () {
+	# -a for archive; -z for compress; -S efficient sparse file handling
+	sudo rsync --delete -azS /opt/seafile-data/seafile /mnt/bak/seafile/data/ 
+}
+
+setup_cron_bak_data () {
+  # use system cron (root user) to run docker exec command (as www-data user) for nextcloud background jobs.
+  sudo su -
+  cronline="0 0 * * * sudo rsync --delete -azS /opt/seafile-data/seafile /mnt/bak/seafile/data/" 
   (crontab -u $(whoami) -l; echo "$cronline" ) | crontab -u $(whoami) -
   exit
 }
