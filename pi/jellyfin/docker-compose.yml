@@ -14,6 +14,7 @@ services:
       - /data/seafile-fuse/cddibble@gmail.com/c317523f-253f-4d52-89d9-366e81201395_Movies:/media
       - /data/seafile-fuse/cddibble@gmail.com/c98f4e77-83dc-47d0-8c9a-2cc436c7a44b_Music:/music
       - /data/seafile-fuse/cddibble@gmail.com/eacd146d-30cd-4fa3-8956-5f689fa7ed5b_eBooks:/ebooks
+      - /data/seafile-fuse/cddibble@gmail.com/8c6f622b-d895-4676-86cc-3e5bdd13e619_Shows/:/shows
       # - /path/to/media2:/media2:ro
     restart: "unless-stopped"
     # Optional - alternative address used for autodiscovery
