@@ -17,6 +17,14 @@ services:
       - /data/seafile-fuse/cddibble@gmail.com/8c6f622b-d895-4676-86cc-3e5bdd13e619_Shows/:/shows
       - /xmltvdata/xmltv.xml:/xmltvdata/xmltv.xml
       # - /path/to/media2:/media2:ro
+    deploy:
+      resources:
+        limits:
+          cpus: "1.5"
+          memory: 4G
+        reservations:
+          cpus: "0.01"
+          memory: 20M
     restart: "unless-stopped"
     # Optional - alternative address used for autodiscovery
     environment:

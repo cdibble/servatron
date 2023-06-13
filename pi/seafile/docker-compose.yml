@@ -37,14 +37,14 @@ services:
     #    cap_add: # for sea-fuse mount point
     #      - SYS_ADMIN
     #      - MKNOD
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: "1"
-    #       memory: 4G
-    #     reservations:
-    #       cpus: "0.0001"
-    #       memory: 20M
+    deploy:
+      resources:
+        limits:
+          cpus: "1.75"
+          memory: 6G
+        reservations:
+          cpus: "0.1"
+          memory: 20M
     environment:
       - DB_HOST=db
       - DB_ROOT_PASSWD=db_dev # Requested, the value shuold be root's password of MySQL service.
