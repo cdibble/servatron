@@ -54,7 +54,7 @@ services:
       resources:
         limits:
           cpus: "1"
-          memory: 4G
+          memory: 3G
         reservations:
           cpus: "0.01"
           memory: 20M
