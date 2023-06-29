@@ -21,7 +21,7 @@ services:
       resources:
         limits:
           cpus: "1"
-          memory: 3G
+          memory: 5G
         reservations:
           cpus: "0.01"
           memory: 20M
