@@ -5,6 +5,26 @@ install () {
 	sudo apt-get install rsync
 }
 
+
+# mount media drive
+mount_media () {
+	# make fs
+	# sudo mkfs.ext4 /dev/sdc1
+	# 
+	sudo mkdir -p /mnt/media
+	sudo chmod 0777 /mnt/media
+	# TODO: Look at the device with the /root volume and mount the other device...
+		# b/c whether it is sda or sdb depends on boot order and is seemingly not deterministic
+	sudo mount -t ext4 /dev/sdc1 /mnt/media -o rw # use -o umask=000
+	# auto-mount on boot; dont enable until after first backup just in case this corrupts the boot volume.
+	# echo "/dev/sda2 /mnt/bak ntfs-3g async,big_writes,noatime,nodiratime,nofail,uid=1000,gid=1000,umask=007,x-systemd.device-timeout=1 0 0" >> /etc/fstab
+}
+
+copy_media () {
+	find $SEAFILE_DIR -mindepth 1 -maxdepth 1 -type d -print0 | xargs -r0 -n1 -P6 -I% rsync --progress -azSH % /mnt/media/Music/
+}
+
+
 # mount bak drive
 mount_bak () {
 	# make fs
