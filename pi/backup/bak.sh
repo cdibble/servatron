@@ -15,13 +15,14 @@ mount_media () {
 	sudo chmod 0777 /mnt/media
 	# TODO: Look at the device with the /root volume and mount the other device...
 		# b/c whether it is sda or sdb depends on boot order and is seemingly not deterministic
-	sudo mount -t ext4 /dev/sdc1 /mnt/media -o rw # use -o umask=000
+	sudo mount -t ext4 /dev/sdb1 /mnt/media -o rw # use -o umask=000
 	# auto-mount on boot; dont enable until after first backup just in case this corrupts the boot volume.
 	# echo "/dev/sda2 /mnt/bak ntfs-3g async,big_writes,noatime,nodiratime,nofail,uid=1000,gid=1000,umask=007,x-systemd.device-timeout=1 0 0" >> /etc/fstab
 }
 
 copy_media () {
-	find $SEAFILE_DIR -mindepth 1 -maxdepth 1 -type d -print0 | xargs -r0 -n1 -P6 -I% rsync --progress -azSH % /mnt/media/Music/
+	SEAFILE_DIR='/home/conman/Photos'
+	find $SEAFILE_DIR -mindepth 1 -maxdepth 1 -type d -print0 | xargs -r0 -n1 -P6 -I% rsync --progress -azSH % /home/conman/Photos/
 }
 
 
@@ -34,7 +35,7 @@ mount_bak () {
 	sudo chmod 0777 /mnt/bak
 	# TODO: Look at the device with the /root volume and mount the other device...
 		# b/c whether it is sda or sdb depends on boot order and is seemingly not deterministic
-	sudo mount -t ext4 /dev/sdb2 /mnt/bak -o rw # use -o umask=000
+	sudo mount -t ext4 /dev/sda2 /mnt/bak -o rw # use -o umask=000
 	# auto-mount on boot; dont enable until after first backup just in case this corrupts the boot volume.
 	# echo "/dev/sda2 /mnt/bak ntfs-3g async,big_writes,noatime,nodiratime,nofail,uid=1000,gid=1000,umask=007,x-systemd.device-timeout=1 0 0" >> /etc/fstab
 }
@@ -77,7 +78,7 @@ setup_cron_bak_dbs () {
 
 bak_data () {
 	# -a for archive; -z for compress; -S efficient sparse file handling; -H dont copy hard-links as separate files
-	sudo rsync --delete -azSH /opt/seafile-data/seafile /mnt/bak/seafile/data/ 
+	sudo rsync --delete -azSH /opt/seafile-data/seafile /mnt/bak/seafile/data/
 }
 
 setup_cron_bak_data () {
