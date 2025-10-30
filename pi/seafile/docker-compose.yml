@@ -5,7 +5,7 @@ services:
     container_name: seafile-mysql
     restart: always
     environment:
-      - MYSQL_ROOT_PASSWORD=db_dev # Requested, set the root's password of MySQL service.
+      - MYSQL_ROOT_PASSWORD=$SEAFILE_DB_PASSWORD # Requested, set the root's password of MySQL service.
       - MYSQL_LOG_CONSOLE=true
     #      - MYSQL_HOST=seafile_db
     volumes:
@@ -24,12 +24,16 @@ services:
       - seafile-net
 
   seafile:
-    image: seafileltd/seafile-mc:latest
+    image: seafileltd/seafile-mc:10.0.1
     container_name: seafile
     restart: always
+    networks:
+      - seafile-net
     ports:
       - "8088:80"
       # - "443:443"  # If https is enabled, cancel the comment.
+    expose:
+      - 8088
     volumes:
       - /opt/seafile-data:/shared # Requested, specifies the path to Seafile data persistent store.
       - /data/seafile-fuse:/seafile-fuse:shared
@@ -57,13 +61,11 @@ services:
       - NON_ROOT=true
       # NGINX:
       - SEAFILE_SERVICE_URL=https://seafile.tuerto.net
-      - SEAFILE_SERVER_HOSTNAME=127.0.0.1 # Specifies your host name if https is enabled.
+      - SEAFILE_SERVER_HOSTNAME=0.0.0.0 # Specifies your host name if https is enabled.
       - SEAFILE_FILE_SERVER_ROOT=https://seafile.tuerto.net/seafhttp
     depends_on:
       - db
       - memcached
-    networks:
-      - seafile-net
 
 networks:
   seafile-net:
