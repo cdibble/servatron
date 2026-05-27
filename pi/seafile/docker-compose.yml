@@ -27,6 +27,8 @@ services:
     image: seafileltd/seafile-mc:10.0.1
     container_name: seafile
     restart: always
+    networks:
+      - seafile-net
     ports:
       - "8088:80"
       # - "443:443"  # If https is enabled, cancel the comment.
@@ -65,8 +67,6 @@ services:
     depends_on:
       - db
       - memcached
-    networks:
-      - seafile-net
 
 networks:
   seafile-net:
