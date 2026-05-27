@@ -1,0 +1,36 @@
+services:
+  mealie:
+    image: ghcr.io/mealie-recipes/mealie:v3.9.2 # 
+    container_name: mealie
+    restart: always
+    ports:
+        - "9925:9000" # 
+    deploy:
+      resources:
+        limits:
+          memory: 1000M # 
+    volumes:
+      - mealie-data:/app/data/
+    environment:
+      # Set Backend ENV Variables Here
+      ALLOW_SIGNUP: "false"
+      PUID: 1000
+      PGID: 1000
+      TZ: America/Los_Angeles
+      BASE_URL: https://mealie.tuerto.net
+      DEFAULT_EMAIL: cddibble@gmail.com
+      DEFAULT_GROUP: Tuerto
+      DEFAULT_HOUSEHOLD: Tuerto
+      SMTP_HOST: "smtp.gmail.com"
+      SMTP_PORT: "465" # Use 465 for SSL or 587 for TLS
+      SMTP_AUTH_STRATEGY: "SSL" # Use "SSL" with port 465, or "TLS" with port 587
+      SMTP_FROM_NAME: "Tuerto Mealie Messager"
+      SMTP_FROM_EMAIL: "cddibble@gmail.com"
+      SMTP_USER: "cddibble@gmail.com"
+      # Enclose your app password in quotes if it contains spaces to ensure Docker reads it correctly
+      SMTP_PASSWORD: $SMTP_PASSWORD
+
+
+
+volumes:
+  mealie-data:
